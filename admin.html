@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - KostManager Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f3f4f6; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { background: linear-gradient(135deg, #1F2937 0%, #111827 100%); color: white; padding: 20px; border-radius: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: white; padding: 20px; border-radius: 16px; display: flex; align-items: center; gap: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .stat-icon { width: 48px; height: 48px; background: #8B5CF6; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; }
+        .card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 12px; background: #F9FAFB; }
+        td { padding: 12px; border-bottom: 1px solid #E5E7EB; }
+        .btn-sm { padding: 6px 12px; border-radius: 8px; border: none; cursor: pointer; margin: 2px; font-size: 12px; }
+        .btn-danger { background: #EF4444; color: white; }
+        .btn-warning { background: #F59E0B; color: white; }
+        .btn-success { background: #10B981; color: white; }
+        .search-box { padding: 10px 16px; border: 1px solid #E5E7EB; border-radius: 40px; width: 300px; margin-bottom: 16px; }
+        .badge { padding: 4px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .badge-active { background: #DCFCE7; color: #15803D; }
+        .badge-inactive { background: #FEE2E2; color: #B91C1C; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div><h1><i class="fas fa-crown"></i> Admin Panel KostManager Pro</h1><p>Kelola semua user pemilik kost</p></div>
+        <button class="btn-sm" style="background:#EF4444; color:white;" onclick="logoutAdmin()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+
+    <div class="stats-grid" id="adminStats"></div>
+
+    <div class="card">
+        <h3 style="margin-bottom: 16px;"><i class="fas fa-users"></i> Daftar Semua User</h3>
+        <input type="text" id="searchUser" class="search-box" placeholder="Cari nama kost atau nomor WA..." onkeyup="filterUsers()">
+        <div class="table-wrapper">
+            <table id="userTable">
+                <thead><tr><th>No WA</th><th>Nama Kost</th><th>Status</th><th>Expired</th><th>Terdaftar</th><th>Last Login</th><th>Aksi</th></tr></thead>
+                <tbody id="userTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCrVmYmY6kktOjbhuc5I3LlqbgxzwWUoSI",
+        authDomain: "manajemen-kost-68569.firebaseapp.com",
+        projectId: "manajemen-kost-68569",
+        storageBucket: "manajemen-kost-68569.firebasestorage.app",
+        messagingSenderId: "202199285940",
+        appId: "1:202199285940:web:27f76df48f12b039fb97e1"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let allUsers = [];
+
+    async function loadUsers() {
+        const snapshot = await db.collection("users").get();
+        allUsers = [];
+        snapshot.forEach(doc => {
+            allUsers.push({ id: doc.id, ...doc.data() });
+        });
+        updateStats();
+        renderUserTable();
+    }
+
+    function updateStats() {
+        const active = allUsers.filter(u => u.status === "aktif").length;
+        const expired = allUsers.filter(u => u.expired_at && new Date(u.expired_at) < new Date()).length;
+        document.getElementById("adminStats").innerHTML = `
+            <div class="stat-card"><div class="stat-icon"><i class="fas fa-users"></i></div><div><h3>${allUsers.length}</h3><p>Total User</p></div></div>
+            <div class="stat-card"><div class="stat-icon"><i class="fas fa-check-circle"></i></div><div><h3>${active}</h3><p>Aktif</p></div></div>
+            <div class="stat-card"><div class="stat-icon"><i class="fas fa-clock"></i></div><div><h3>${expired}</h3><p>Expired</p></div></div>
+            <div class="stat-card"><div class="stat-icon"><i class="fas fa-building"></i></div><div><h3>${allUsers.length}</h3><p>Total Kost</p></div></div>
+        `;
+    }
+
+    function renderUserTable() {
+        const search = document.getElementById("searchUser")?.value.toLowerCase() || "";
+        const filtered = allUsers.filter(u => u.nama_kost?.toLowerCase().includes(search) || u.no_wa?.includes(search));
+        const tbody = document.getElementById("userTableBody");
+        tbody.innerHTML = "";
+        filtered.forEach(user => {
+            const isExpired = user.expired_at && new Date(user.expired_at) < new Date();
+            tbody.innerHTML += `
+                <tr>
+                    <td>${user.no_wa}</td>
+                    <td><strong>${user.nama_kost || '-'}</strong></td>
+                    <td><span class="badge ${user.status === 'aktif' ? 'badge-active' : 'badge-inactive'}">${user.status === 'aktif' ? '✅ Aktif' : '❌ Nonaktif'}</span></td>
+                    <td>${user.expired_at || '-'} ${isExpired ? '<span class="badge badge-inactive">Expired</span>' : ''}</td>
+                    <td>${new Date(user.created_at).toLocaleDateString('id')}</td>
+                    <td>${user.last_login ? new Date(user.last_login).toLocaleString('id') : '-'}</td>
+                    <td>
+                        <button class="btn-sm btn-success" onclick="perpanjangLisensi('${user.no_wa}')"><i class="fas fa-calendar-plus"></i> Perpanjang</button>
+                        <button class="btn-sm btn-warning" onclick="toggleStatus('${user.no_wa}', '${user.status}')"><i class="fas fa-power-off"></i> ${user.status === 'aktif' ? 'Nonaktifkan' : 'Aktifkan'}</button>
+                        <button class="btn-sm btn-danger" onclick="hapusUser('${user.no_wa}')"><i class="fas fa-trash"></i> Hapus</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    async function perpanjangLisensi(noWa) {
+        const expiredDate = new Date();
+        expiredDate.setFullYear(expiredDate.getFullYear() + 1);
+        await db.collection("users").doc(noWa).update({
+            expired_at: expiredDate.toISOString().split('T')[0],
+            status: "aktif"
+        });
+        alert("Lisensi diperpanjang 1 tahun!");
+        loadUsers();
+    }
+
+    async function toggleStatus(noWa, currentStatus) {
+        const newStatus = currentStatus === "aktif" ? "nonaktif" : "aktif";
+        await db.collection("users").doc(noWa).update({ status: newStatus });
+        alert(`User ${newStatus === "aktif" ? "diaktifkan" : "dinonaktifkan"}`);
+        loadUsers();
+    }
+
+    async function hapusUser(noWa) {
+        if (confirm(`Hapus user ${noWa}? Semua datanya akan hilang!`)) {
+            await db.collection("users").doc(noWa).delete();
+            await db.collection("kost_data").doc(noWa).delete();
+            alert("User berhasil dihapus!");
+            loadUsers();
+        }
+    }
+
+    function filterUsers() { renderUserTable(); }
+
+    function logoutAdmin() {
+        window.location.href = "login.html";
+    }
+
+    loadUsers();
+</script>
+</body>
+</html>
