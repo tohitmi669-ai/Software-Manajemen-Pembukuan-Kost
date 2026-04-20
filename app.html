@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#8B5CF6">
+    <title>KostManager Pro - Manajemen Kost</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #e9edf2 100%); min-height: 100vh; padding: 12px; padding-bottom: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 24px; padding: 16px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); }
+        .logo-area h1 { font-size: 20px; font-weight: 700; background: linear-gradient(135deg, #6B21A5 0%, #8B5CF6 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .logo-area p { font-size: 11px; color: #6B7280; margin-top: 2px; }
+        .user-info { background: #F3E8FF; padding: 6px 14px; border-radius: 40px; font-size: 12px; font-weight: 500; color: #6B21A5; }
+        .btn-primary, .btn-outline, .btn-sm, .tab-btn { min-height: 44px; cursor: pointer; transition: all 0.15s ease; }
+        .btn-primary:active, .btn-outline:active, .btn-sm:active, .tab-btn:active { transform: scale(0.94); }
+        .btn-primary { background: linear-gradient(135deg, #8B5CF6 0%, #6B21A5 100%); color: white; border: none; padding: 10px 18px; border-radius: 40px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-outline { background: transparent; border: 1.5px solid #8B5CF6; color: #6B21A5; padding: 8px 16px; border-radius: 40px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-danger { background: #EF4444; color: white; border: none; padding: 10px 18px; border-radius: 40px; font-weight: 600; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: rgba(255,255,255,0.6); backdrop-filter: blur(8px); padding: 6px; border-radius: 60px; overflow-x: auto; scrollbar-width: thin; }
+        .tab-btn { padding: 10px 18px; background: transparent; border: none; border-radius: 40px; font-weight: 600; font-size: 12px; color: #4B5563; display: flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; }
+        .tab-btn.active { background: linear-gradient(135deg, #8B5CF6 0%, #6B21A5 100%); color: white; }
+        .card { background: white; border-radius: 20px; padding: 18px; margin-bottom: 18px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); }
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+        .stat-card { background: white; border-radius: 18px; padding: 14px; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(139, 92, 246, 0.15); }
+        .stat-icon { width: 44px; height: 44px; background: linear-gradient(135deg, #F3E8FF 0%, #E9D5FF 100%); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #6B21A5; }
+        .stat-info h3 { font-size: 20px; font-weight: 800; color: #1F2937; }
+        .stat-info p { color: #6B7280; font-size: 11px; font-weight: 500; }
+        .table-wrapper { overflow-x: auto; border-radius: 16px; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        th { text-align: left; padding: 12px 10px; background: #F9FAFB; color: #374151; font-weight: 600; font-size: 12px; }
+        td { padding: 12px 10px; border-bottom: 1px solid #F3F4F6; color: #4B5563; font-size: 13px; }
+        .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 40px; font-size: 11px; font-weight: 600; }
+        .badge-lunas { background: #DCFCE7; color: #15803D; }
+        .badge-terlambat { background: #FEE2E2; color: #B91C1C; }
+        .badge-pemasukan { background: #DCFCE7; color: #15803D; }
+        .badge-pengeluaran { background: #FEE2E2; color: #B91C1C; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: #374151; font-size: 13px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 14px; border: 1.5px solid #E5E7EB; border-radius: 14px; font-size: 14px; font-family: 'Inter', sans-serif; }
+        .btn-sm { padding: 6px 12px; font-size: 11px; border-radius: 30px; border: none; font-weight: 500; cursor: pointer; margin: 2px; display: inline-flex; align-items: center; gap: 4px; }
+        .btn-wa { background: #25D366; color: white; }
+        .btn-success { background: #10B981; color: white; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; border-radius: 28px; max-width: 500px; width: 90%; padding: 20px; max-height: 80vh; overflow-y: auto; }
+        .close-modal { position: absolute; top: 16px; right: 20px; font-size: 28px; cursor: pointer; color: #9CA3AF; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeInUp 0.3s ease-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .profit-positive { color: #10B981; font-weight: bold; }
+        .profit-negative { color: #EF4444; font-weight: bold; }
+        @media (max-width: 480px) { body { padding: 10px; } .stat-card { padding: 10px; gap: 8px; } .stat-icon { width: 38px; height: 38px; font-size: 18px; } .stat-info h3 { font-size: 18px; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div class="logo-area">
+            <h1><i class="fas fa-building"></i> KostManager Pro</h1>
+            <p>Manajemen Kost + Pembukuan Lengkap</p>
+        </div>
+        <div class="action-buttons">
+            <span class="user-info" id="userNameDisplay"></span>
+            <button class="btn-outline" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="dashboard" onclick="openTab('dashboard')"><i class="fas fa-chart-line"></i> Dashboard</button>
+        <button class="tab-btn" data-tab="penyewa" onclick="openTab('penyewa')"><i class="fas fa-users"></i> Penyewa</button>
+        <button class="tab-btn" data-tab="tambah" onclick="openTab('tambah')"><i class="fas fa-plus-circle"></i> Tambah</button>
+        <button class="tab-btn" data-tab="kamar" onclick="openTab('kamar')"><i class="fas fa-door-open"></i> Kamar</button>
+        <button class="tab-btn" data-tab="pembukuan" onclick="openTab('pembukuan')"><i class="fas fa-book"></i> Pembukuan</button>
+        <button class="tab-btn" data-tab="pengaturan" onclick="openTab('pengaturan')"><i class="fas fa-sliders-h"></i> Setelan</button>
+    </div>
+
+    <div id="dashboard" class="tab-content active"><div class="stats-grid" id="dashboard-stats"></div><div class="card"><h3><i class="fas fa-exclamation-triangle" style="color:#F59E0B;"></i> Penyewa Jatuh Tempo</h3><div class="table-wrapper"><table id="table-jatuh-tempo"><thead><tr><th>Nama</th><th>Kamar</th><th>Jatuh Tempo</th><th>Terlambat</th><th>Aksi</th></tr></thead><tbody></tbody></table></div></div></div>
+    <div id="penyewa" class="tab-content"><div class="card"><div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 16px;"><h3><i class="fas fa-users"></i> Semua Penyewa</h3><input type="text" id="search-penyewa" placeholder="Cari nama/kamar..." style="padding: 8px 14px; border-radius: 40px; border:1px solid #E5E7EB;"></div><div class="table-wrapper"><table id="table-penyewa"><thead><tr><th>Nama</th><th>Kamar</th><th>WA</th><th>Jatuh Tempo</th><th>Status</th><th>Aksi</th></tr></thead><tbody></tbody></table></div></div></div>
+    <div id="tambah" class="tab-content"><div class="card"><h3><i class="fas fa-user-plus"></i> Form Pendaftaran Penyewa</h3><div class="form-group"><label>Nama Lengkap</label><input type="text" id="nama" placeholder="Contoh: Budi Santoso"></div><div class="form-group"><label>Nomor WhatsApp</label><input type="text" id="nowa" placeholder="6281234567890"></div><div class="form-group"><label>Pilih Kamar</label><select id="kamar_id"></select></div><div class="form-group"><label>Tanggal Masuk</label><input type="date" id="tgl_masuk"></div><div class="form-group"><label>Harga Sewa</label><input type="text" id="harga" readonly style="background:#F9FAFB;"></div><button class="btn-primary" onclick="tambahPenyewa()" style="width:100%;"><i class="fas fa-save"></i> Simpan Penyewa</button></div></div>
+    <div id="kamar" class="tab-content"><div class="card"><h3><i class="fas fa-plus-circle"></i> Tambah Kamar Baru</h3><div style="display: flex; gap: 10px; flex-wrap: wrap;"><div style="flex:1"><input type="text" id="nomor_kamar" placeholder="Nomor Kamar (A01)"></div><div style="flex:1"><input type="number" id="harga_kamar" placeholder="Harga per bulan"></div><button class="btn-primary" onclick="tambahKamar()"><i class="fas fa-door-open"></i> Tambah</button></div></div><div class="card"><h3><i class="fas fa-list"></i> Daftar Kamar</h3><div class="table-wrapper"><table id="table-kamar"><thead><tr><th>Kamar</th><th>Harga</th><th>Status</th><th>Aksi</th></tr></thead><tbody></tbody></table></div></div></div>
+    <div id="pembukuan" class="tab-content"><div class="stats-grid" id="keuangan-stats"></div><div class="card"><div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;"><h3><i class="fas fa-plus-circle"></i> Tambah Transaksi</h3><button class="btn-primary" onclick="downloadPDFLaporanKeuangan()" style="background: #dc2626;"><i class="fas fa-file-pdf"></i> Download PDF</button></div><div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px;"><select id="transaksi_jenis" style="flex:1; padding: 12px; border-radius: 14px;"><option value="pengeluaran">Pengeluaran</option><option value="pemasukan">Pemasukan Lain</option></select><select id="transaksi_kategori" style="flex:1; padding: 12px; border-radius: 14px;"><option value="listrik">Listrik</option><option value="air">Air</option><option value="wifi">WiFi</option><option value="renovasi">Renovasi</option><option value="lainnya">Lainnya</option></select><input type="number" id="transaksi_nominal" placeholder="Nominal" style="flex:1; padding: 12px; border-radius: 14px;"><input type="date" id="transaksi_tanggal" style="flex:1; padding: 12px; border-radius: 14px;"></div><input type="text" id="transaksi_keterangan" placeholder="Keterangan" style="width:100%; margin-top: 12px; padding: 12px; border-radius: 14px;"><button class="btn-primary" onclick="tambahTransaksi()" style="width:100%; margin-top: 12px;">Simpan Transaksi</button></div><div class="card"><h3>Riwayat Transaksi</h3><input type="text" id="search-transaksi" placeholder="Cari transaksi..." style="padding: 8px 14px; width:100%; margin-bottom: 12px; border-radius: 40px;"><div class="table-wrapper"><table id="table-transaksi"><thead><tr><th>Tanggal</th><th>Jenis</th><th>Kategori</th><th>Keterangan</th><th>Nominal</th><th>Aksi</th></tr></thead><tbody></tbody></table></div></div></div>
+    <div id="pengaturan" class="tab-content"><div class="card"><h3>Profil Kost</h3><div class="form-group"><label>Nama Kost</label><input type="text" id="setting_nama_kost"></div><div class="form-group"><label>Alamat</label><input type="text" id="setting_alamat"></div><div class="form-group"><label>Rekening</label><input type="text" id="setting_rekening"></div><button class="btn-primary" onclick="simpanPengaturan()">Simpan</button></div></div>
+</div>
+
+<div id="modalNota" class="modal"><div class="modal-content"><span class="close-modal" onclick="closeModal()">&times;</span><div id="nota-preview" style="font-family: monospace; white-space: pre-line;"></div><button class="btn-primary" onclick="kirimWADariModal()" style="width:100%; margin-top: 20px;"><i class="fab fa-whatsapp"></i> Kirim WA</button></div></div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCrVmYmY6kktOjbhuc5I3LlqbgxzwWUoSI",
+        authDomain: "manajemen-kost-68569.firebaseapp.com",
+        projectId: "manajemen-kost-68569",
+        storageBucket: "manajemen-kost-68569.firebasestorage.app",
+        messagingSenderId: "202199285940",
+        appId: "1:202199285940:web:27f76df48f12b039fb97e1"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let currentUser = null;
+    let penyewaList = [];
+    let kamarList = [];
+    let transaksiList = [];
+    let pengaturan = { nama_kost: "", alamat: "", rekening: "" };
+    let pendingNota = null;
+
+    function checkAuth() {
+        const savedUser = localStorage.getItem("kost_user");
+        if (!savedUser) {
+            window.location.href = "login.html";
+            return null;
+        }
+        currentUser = JSON.parse(savedUser);
+        document.getElementById("userNameDisplay").innerHTML = `<i class="fas fa-store"></i> ${currentUser.nama_kost}`;
+        return currentUser;
+    }
+
+    async function loadData() {
+        if (!currentUser) return;
+        const docRef = db.collection("kost_data").doc(currentUser.no_wa);
+        const doc = await docRef.get();
+        if (doc.exists) {
+            const data = doc.data();
+            penyewaList = data.penyewa || [];
+            kamarList = data.kamar || [];
+            transaksiList = data.transaksi || [];
+            pengaturan = data.pengaturan || { nama_kost: currentUser.nama_kost, alamat: "", rekening: "" };
+        } else {
+            kamarList = [{ id: "k1", nomor: "A01", harga: 850000, status: "kosong" }, { id: "k2", nomor: "A02", harga: 850000, status: "kosong" }];
+        }
+        document.getElementById("setting_nama_kost").value = pengaturan.nama_kost;
+        document.getElementById("setting_alamat").value = pengaturan.alamat;
+        document.getElementById("setting_rekening").value = pengaturan.rekening;
+        renderTabelKamar();
+        renderDashboard();
+        renderTabelPenyewa();
+        hitungKeuangan();
+        renderRiwayatTransaksi();
+    }
+
+    async function saveToFirebase() {
+        if (!currentUser) return;
+        await db.collection("kost_data").doc(currentUser.no_wa).set({
+            penyewa: penyewaList,
+            kamar: kamarList,
+            transaksi: transaksiList,
+            pengaturan: pengaturan
+        });
+    }
+
+    function hitungJatuhTempo(tglMasuk) { let d = new Date(tglMasuk); d.setDate(d.getDate() + 30); return d.toISOString().split('T')[0]; }
+    function cekStatus(jatuhTempo) { let today = new Date().toISOString().split('T')[0]; if (jatuhTempo < today) return "terlambat"; if (jatuhTempo === today) return "jatuh"; return "lunas"; }
+    function hitungTerlambat(jatuhTempo) { let today = new Date(), jt = new Date(jatuhTempo); if (today > jt) return Math.floor((today - jt) / (1000 * 60 * 60 * 24)); return 0; }
+    function formatRupiah(angka) { return "Rp " + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
+
+    async function renderDashboard() {
+        let terlambat = penyewaList.filter(p => cekStatus(p.jatuh_tempo) !== "lunas");
+        let totalKamar = kamarList.length, terisi = kamarList.filter(k => k.status === "terisi").length;
+        let pendapatan = penyewaList.reduce((s, p) => { let k = kamarList.find(k => k.id === p.kamar_id); return s + (k ? k.harga : 0); }, 0);
+        document.getElementById("dashboard-stats").innerHTML = `
+            <div class="stat-card"><div class="stat-icon"><i class="fas fa-door-open"></i></div><div class="stat-info"><h3>${totalKamar}</h3><p>Total Kamar</p></div></div>
+            <div class="stat-card"><div class="stat-icon"><i class="fas fa-user-check"></i></div><div class="stat-info"><h3>${terisi}</h3><p>Kamar Terisi</p></div></div>
+            <div class="stat-card"><div class="stat-icon"><i class="fas fa-clock"></i></div><div class="stat-info"><h3>${terlambat.length}</h3><p>Jatuh Tempo</p></div></div>
+            <div class="stat-card"><div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div><div class="stat-info"><h3>${formatRupiah(pendapatan)}</h3><p>Pendapatan/Bulan</p></div></div>
+        `;
+        let tbody = document.querySelector("#table-jatuh-tempo tbody");
+        if (tbody) {
+            tbody.innerHTML = "";
+            terlambat.forEach(p => {
+                let kamar = kamarList.find(k => k.id === p.kamar_id);
+                let terl = hitungTerlambat(p.jatuh_tempo);
+                tbody.innerHTML += `<tr><td>${p.nama}</td><td>${kamar?.nomor}</td><td>${p.jatuh_tempo}</td><td>${terl > 0 ? terl + " hari" : "Hari ini"}</td><td><button class="btn-sm btn-wa" onclick="previewNota('${p.id}')"><i class="fab fa-whatsapp"></i> Nota</button><button class="btn-sm btn-success" onclick="tandaiLunas('${p.id}')">Lunas</button></td></tr>`;
+            });
+        }
+    }
+
+    function renderTabelPenyewa() {
+        let search = document.getElementById("search-penyewa")?.value.toLowerCase() || "";
+        let filtered = penyewaList.filter(p => p.nama.toLowerCase().includes(search) || (kamarList.find(k => k.id === p.kamar_id)?.nomor || "").includes(search));
+        let tbody = document.querySelector("#table-penyewa tbody");
+        if (tbody) {
+            tbody.innerHTML = "";
+            filtered.forEach(p => {
+                let kamar = kamarList.find(k => k.id === p.kamar_id);
+                let status = cekStatus(p.jatuh_tempo);
+                let badgeClass = status === "lunas" ? "badge-lunas" : "badge-terlambat";
+                let badgeText = status === "lunas" ? "✅ Lunas" : "🔴 Terlambat";
+                tbody.innerHTML += `<tr><td>${p.nama}</td><td>${kamar?.nomor}</td><td>${p.no_wa}</td><td>${p.jatuh_tempo}</td><td><span class="badge ${badgeClass}">${badgeText}</span></td><td><button class="btn-sm btn-wa" onclick="previewNota('${p.id}')"><i class="fab fa-whatsapp"></i></button><button class="btn-sm btn-success" onclick="tandaiLunas('${p.id}')">Lunas</button><button class="btn-sm btn-danger" onclick="hapusPenyewa('${p.id}')"><i class="fas fa-trash"></i></button></td></tr>`;
+            });
+        }
+    }
+
+    function renderTabelKamar() {
+        let tbody = document.querySelector("#table-kamar tbody");
+        if (tbody) {
+            tbody.innerHTML = "";
+            kamarList.forEach(k => {
+                tbody.innerHTML += `<tr><td>${k.nomor}</td><td>${formatRupiah(k.harga)}</td><td><span class="badge">${k.status === "terisi" ? "🔴 Terisi" : "🟢 Kosong"}</span></td><td><button class="btn-sm btn-danger" onclick="hapusKamar('${k.id}')">Hapus</button></td></tr>`;
+            });
+        }
+        let select = document.getElementById("kamar_id");
+        if (select) {
+            select.innerHTML = "<option value=''>-- Pilih Kamar --</option>";
+            kamarList.filter(k => k.status === "kosong").forEach(k => { select.innerHTML += `<option value="${k.id}" data-harga="${k.harga}">${k.nomor} - ${formatRupiah(k.harga)}</option>`; });
+            select.onchange = function () { let harga = select.options[select.selectedIndex]?.getAttribute("data-harga"); if (harga) document.getElementById("harga").value = harga; };
+        }
+    }
+
+    function hitungKeuangan() {
+        let totalPemasukan = penyewaList.reduce((s, p) => { let k = kamarList.find(k => k.id === p.kamar_id); return s + (k ? k.harga : 0); }, 0);
+        let tambahanPemasukan = transaksiList.filter(t => t.jenis === "pemasukan").reduce((s, t) => s + t.nominal, 0);
+        let totalPengeluaran = transaksiList.filter(t => t.jenis === "pengeluaran").reduce((s, t) => s + t.nominal, 0);
+        let laba = (totalPemasukan + tambahanPemasukan) - totalPengeluaran;
+        document.getElementById("keuangan-stats").innerHTML = `
+            <div class="stat-card"><div class="stat-icon"><i class="fas fa-arrow-up"></i></div><div class="stat-info"><h3>${formatRupiah(totalPemasukan)}</h3><p>Pendapatan Sewa</p></div></div>
+            <div class="stat-card"><div class="stat-icon"><i class="fas fa-plus-circle"></i></div><div class="stat-info"><h3>${formatRupiah(tambahanPemasukan)}</h3><p>Pemasukan Lain</p></div></div>
+            <div class="stat-card"><div class="stat-icon"><i class="fas fa-arrow-down"></i></div><div class="stat-info"><h3>${formatRupiah(totalPengeluaran)}</h3><p>Total Pengeluaran</p></div></div>
+            <div class="stat-card"><div class="stat-icon"><i class="fas fa-chart-line"></i></div><div class="stat-info"><h3 class="${laba >= 0 ? 'profit-positive' : 'profit-negative'}">${formatRupiah(laba)}</h3><p>Laba Bersih</p></div></div>
+        `;
+    }
+
+    function renderRiwayatTransaksi() {
+        let search = document.getElementById("search-transaksi")?.value.toLowerCase() || "";
+        let filtered = transaksiList.filter(t => t.keterangan?.toLowerCase().includes(search) || t.kategori.toLowerCase().includes(search));
+        filtered.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+        let tbody = document.querySelector("#table-transaksi tbody");
+        if (tbody) {
+            tbody.innerHTML = "";
+            filtered.forEach(t => {
+                tbody.innerHTML += `<tr><td>${t.tanggal}</td><td><span class="badge ${t.jenis === 'pemasukan' ? 'badge-pemasukan' : 'badge-pengeluaran'}">${t.jenis === 'pemasukan' ? '📥 Pemasukan' : '📤 Pengeluaran'}</span></td><td>${t.kategori}</td><td>${t.keterangan || '-'}</td><td>${formatRupiah(t.nominal)}</td><td><button class="btn-sm btn-danger" onclick="hapusTransaksi('${t.id}')">Hapus</button></td></tr>`;
+            });
+        }
+    }
+
+    async function tambahPenyewa() {
+        let nama = document.getElementById("nama").value, no_wa = document.getElementById("nowa").value, kamar_id = document.getElementById("kamar_id").value, tgl = document.getElementById("tgl_masuk").value;
+        if (!nama || !no_wa || !kamar_id || !tgl) { alert("Isi semua data!"); return; }
+        let jatuh_tempo = hitungJatuhTempo(tgl);
+        penyewaList.push({ id: "p" + Date.now(), nama, no_wa, kamar_id, tgl_masuk: tgl, jatuh_tempo });
+        kamarList = kamarList.map(k => k.id === kamar_id ? { ...k, status: "terisi" } : k);
+        await saveToFirebase();
+        renderTabelKamar();
+        renderTabelPenyewa();
+        renderDashboard();
+        hitungKeuangan();
+        alert("Penyewa berhasil ditambahkan!");
+        document.getElementById("nama").value = ""; document.getElementById("nowa").value = ""; document.getElementById("tgl_masuk").value = "";
+    }
+
+    async function hapusPenyewa(id) { if (confirm("Hapus penyewa?")) { let p = penyewaList.find(p => p.id === id); if (p) kamarList = kamarList.map(k => k.id === p.kamar_id ? { ...k, status: "kosong" } : k); penyewaList = penyewaList.filter(p => p.id !== id); await saveToFirebase(); renderTabelKamar(); renderTabelPenyewa(); renderDashboard(); hitungKeuangan(); } }
+    async function tandaiLunas(id) { alert("✅ Penyewa ditandai LUNAS"); renderDashboard(); renderTabelPenyewa(); }
+    async function tambahKamar() { let nomor = document.getElementById("nomor_kamar").value, harga = parseInt(document.getElementById("harga_kamar").value); if (!nomor || !harga) return; kamarList.push({ id: "k" + Date.now(), nomor, harga, status: "kosong" }); await saveToFirebase(); renderTabelKamar(); document.getElementById("nomor_kamar").value = ""; document.getElementById("harga_kamar").value = ""; hitungKeuangan(); }
+    async function hapusKamar(id) { let k = kamarList.find(k => k.id === id); if (k.status === "terisi") { alert("Kamar terisi, tidak bisa hapus!"); return; } kamarList = kamarList.filter(k => k.id !== id); await saveToFirebase(); renderTabelKamar(); hitungKeuangan(); }
+    async function tambahTransaksi() { let jenis = document.getElementById("transaksi_jenis").value, kategori = document.getElementById("transaksi_kategori").value, nominal = parseInt(document.getElementById("transaksi_nominal").value), tanggal = document.getElementById("transaksi_tanggal").value, keterangan = document.getElementById("transaksi_keterangan").value; if (!nominal || !tanggal) { alert("Isi nominal dan tanggal!"); return; } transaksiList.push({ id: "t" + Date.now(), jenis, kategori, nominal, tanggal, keterangan }); await saveToFirebase(); renderRiwayatTransaksi(); hitungKeuangan(); document.getElementById("transaksi_nominal").value = ""; document.getElementById("transaksi_keterangan").value = ""; alert("Transaksi disimpan!"); }
+    async function hapusTransaksi(id) { if (confirm("Hapus transaksi?")) { transaksiList = transaksiList.filter(t => t.id !== id); await saveToFirebase(); renderRiwayatTransaksi(); hitungKeuangan(); } }
+    async function simpanPengaturan() { pengaturan.nama_kost = document.getElementById("setting_nama_kost").value; pengaturan.alamat = document.getElementById("setting_alamat").value; pengaturan.rekening = document.getElementById("setting_rekening").value; await saveToFirebase(); alert("Pengaturan disimpan!"); }
+
+    function buatNota(penyewa) {
+        let kamar = kamarList.find(k => k.id === penyewa.kamar_id);
+        let terlambat = hitungTerlambat(penyewa.jatuh_tempo);
+        let denda = terlambat * 5000;
+        let total = (kamar ? kamar.harga : 0) + denda;
+        return `🏠 *${pengaturan.nama_kost || currentUser.nama_kost}*\n${pengaturan.alamat}\n\n📄 *NOTA TAGIHAN*\nKepada: ${penyewa.nama}\nKamar: ${kamar?.nomor}\nJatuh Tempo: ${penyewa.jatuh_tempo}\nTerlambat: ${terlambat > 0 ? terlambat + " hari" : "-"} (Denda Rp${denda.toLocaleString()})\n\n💸 Sewa: ${formatRupiah(kamar?.harga || 0)}\n🚨 Denda: ${formatRupiah(denda)}\n*TOTAL: ${formatRupiah(total)}*\n\nTransfer ke: ${pengaturan.rekening}\nTerima kasih.`;
+    }
+    function previewNota(id) { let p = penyewaList.find(p => p.id === id); if (p) { pendingNota = p; document.getElementById("nota-preview").innerText = buatNota(p); document.getElementById("modalNota").style.display = "flex"; } }
+    function closeModal() { document.getElementById("modalNota").style.display = "none"; pendingNota = null; }
+    function kirimWADariModal() { if (pendingNota) { let pesan = encodeURIComponent(buatNota(pendingNota)); window.open(`https://wa.me/${pendingNota.no_wa}?text=${pesan}`, "_blank"); closeModal(); } }
+
+    function downloadPDFLaporanKeuangan() {
+        const element = document.getElementById("pembukuan").cloneNode(true);
+        const btn = element.querySelector('button[onclick="downloadPDFLaporanKeuangan()"]');
+        if (btn) btn.remove();
+        const style = document.createElement('style');
+        style.textContent = `body { font-family: 'Inter', sans-serif; padding: 20px; } .stats-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; } .stat-card { background: #f9fafb; border-radius: 18px; padding: 14px; } .badge-pemasukan { background:#dcfce7; } .badge-pengeluaran { background:#fee2e2; }`;
+        element.prepend(style);
+        html2pdf().set({ margin: 0.5, filename: `Laporan_Keuangan_${new Date().toISOString().slice(0,10)}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } }).from(element).save();
+    }
+
+    function openTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
+        if (tabId === 'dashboard') renderDashboard();
+        if (tabId === 'penyewa') renderTabelPenyewa();
+        if (tabId === 'kamar') renderTabelKamar();
+        if (tabId === 'pembukuan') { hitungKeuangan(); renderRiwayatTransaksi(); }
+    }
+
+    function logout() {
+        localStorage.removeItem("kost_user");
+        window.location.href = "login.html";
+    }
+
+    if (checkAuth()) { loadData(); }
+</script>
+</body>
+</html>
