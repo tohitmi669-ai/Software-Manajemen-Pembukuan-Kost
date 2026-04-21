@@ -197,6 +197,11 @@
         .payment-btn:active { transform: scale(0.97); }
         .payment-note { font-size: 11px; color: #9CA3AF; text-align: center; }
         .payment-note i { margin-right: 4px; }
+
+        /* BADGE UNTUK STATUS USER */
+        .status-badge-expired { background: #FEE2E2; color: #B91C1C; padding: 4px 12px; border-radius: 40px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+        .status-badge-nonaktif { background: #FEF3C7; color: #92400E; padding: 4px 12px; border-radius: 40px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+        .status-badge-aktif { background: #DCFCE7; color: #15803D; padding: 4px 12px; border-radius: 40px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
     </style>
 </head>
 <body>
@@ -209,6 +214,7 @@
         </div>
         <div class="action-buttons" style="display: flex; gap: 8px; align-items: center;">
             <span class="user-info" id="userNameDisplay"><i class="fas fa-store"></i> Memuat...</span>
+            <span id="statusBadge" style="margin-left: 8px;"></span>
             <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Keluar</button>
         </div>
     </div>
@@ -261,7 +267,7 @@
     <div class="payment-popup-content">
         <div class="payment-popup-header">
             <i class="fas fa-gem" style="font-size: 32px; color: white;"></i>
-            <h2>Perpanjang Lisensi</h2>
+            <h2>⚠️ Lisensi Belum Aktif</h2>
             <button class="payment-popup-close" onclick="closePaymentPopup()">&times;</button>
         </div>
         <div class="payment-popup-body">
@@ -272,16 +278,17 @@
                     <span class="price-period">/tahun</span>
                 </div>
                 <p class="payment-desc">
+                    <i class="fas fa-exclamation-triangle" style="color: #F59E0B;"></i> Akun Anda belum diaktifkan oleh admin<br>
                     <i class="fas fa-check-circle"></i> Akses penuh semua fitur<br>
                     <i class="fas fa-check-circle"></i> Update gratis selamanya<br>
                     <i class="fas fa-check-circle"></i> Support via WhatsApp 24/7
                 </p>
             </div>
             <button class="payment-btn" onclick="bayarViaWA()">
-                <i class="fab fa-whatsapp"></i> Bayar via WhatsApp
+                <i class="fab fa-whatsapp"></i> Hubungi Admin via WhatsApp
             </button>
             <p class="payment-note">
-                <i class="fas fa-info-circle"></i> Setelah pembayaran, lisensi akan diaktifkan otomatis oleh admin
+                <i class="fas fa-info-circle"></i> Setelah pembayaran, lisensi akan diaktifkan oleh admin dalam 1x24 jam
             </p>
         </div>
     </div>
@@ -309,6 +316,11 @@
     let pendingNota = null;
     let popupSettings = { show_popup: false, harga: 47500, nomor_admin: "6287769299270" };
     let userPopupSetting = true;
+    
+    // ============ VARIABEL UNTUK POPUP REPEAT ============
+    let popupInterval = null;
+    let isPopupShowing = false;
+    let userStatus = { isActive: true, isExpired: false };
 
     // Helper functions
     function formatRupiah(angka) { return "Rp " + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
@@ -326,6 +338,108 @@
         });
     }
 
+    // ============ CEK STATUS USER (AKTIF ATAU TIDAK) ============
+    async function checkUserStatus() {
+        if (!currentUser) return { isActive: false, isExpired: true };
+        
+        const userDoc = await db.collection("users").doc(currentUser.no_wa).get();
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            const isExpired = userData.expired_at && new Date(userData.expired_at) < new Date();
+            const isActive = userData.status === "aktif" && !isExpired;
+            
+            userStatus = { isActive, isExpired, status: userData.status, expired_at: userData.expired_at };
+            
+            // Update status badge di header
+            updateStatusBadge();
+            
+            return userStatus;
+        }
+        return { isActive: false, isExpired: true };
+    }
+    
+    function updateStatusBadge() {
+        const badgeContainer = document.getElementById("statusBadge");
+        if (!badgeContainer) return;
+        
+        if (userStatus.isActive) {
+            badgeContainer.innerHTML = '<span class="status-badge-aktif"><i class="fas fa-check-circle"></i> Lisensi Aktif</span>';
+        } else if (userStatus.isExpired) {
+            badgeContainer.innerHTML = '<span class="status-badge-expired"><i class="fas fa-clock"></i> Lisensi Expired</span>';
+        } else {
+            badgeContainer.innerHTML = '<span class="status-badge-nonaktif"><i class="fas fa-ban"></i> Belum Diaktifkan</span>';
+        }
+    }
+    
+    // ============ MANAJEMEN POPUP REPEAT SETIAP 3 DETIK ============
+    async function checkAndShowPopup() {
+        if (!currentUser) return;
+        
+        // Ambil status user terbaru
+        await checkUserStatus();
+        
+        // Cek apakah user belum aktif (status nonaktif ATAU expired)
+        const isUserNotActive = !userStatus.isActive;
+        
+        // Cek setting global popup
+        const shouldShow = popupSettings.show_popup === true && userPopupSetting === true;
+        
+        // Tampilkan popup jika:
+        // 1. Setting global aktif
+        // 2. User belum aktif (nonaktif atau expired)
+        if (shouldShow && isUserNotActive && !isPopupShowing) {
+            showPaymentPopup();
+        } else if (!isUserNotActive) {
+            // Jika user sudah aktif, hentikan interval popup
+            stopPopupInterval();
+        }
+    }
+    
+    function showPaymentPopup() {
+        if (isPopupShowing) return;
+        isPopupShowing = true;
+        const popup = document.getElementById("paymentPopup");
+        if (popup) {
+            popup.style.display = "flex";
+        }
+    }
+    
+    function closePaymentPopup() {
+        const popup = document.getElementById("paymentPopup");
+        if (popup) {
+            popup.style.display = "none";
+        }
+        isPopupShowing = false;
+        
+        // Setelah close, tetap akan muncul lagi dalam 3 detik jika user masih belum aktif
+        // Fungsi ini akan dipanggil lagi oleh interval
+    }
+    
+    function startPopupInterval() {
+        // Hentikan interval yang sudah ada
+        if (popupInterval) {
+            clearInterval(popupInterval);
+        }
+        // Mulai interval baru setiap 3 detik
+        popupInterval = setInterval(async () => {
+            await checkAndShowPopup();
+        }, 3000); // 3000 ms = 3 detik
+    }
+    
+    function stopPopupInterval() {
+        if (popupInterval) {
+            clearInterval(popupInterval);
+            popupInterval = null;
+        }
+        // Sembunyikan popup jika sedang tampil
+        if (isPopupShowing) {
+            const popup = document.getElementById("paymentPopup");
+            if (popup) popup.style.display = "none";
+            isPopupShowing = false;
+        }
+    }
+    
+    // ============ LOAD DATA USER DARI FIRESTORE ============
     async function checkAuth() {
         const savedUser = localStorage.getItem("kost_user");
         if (!savedUser) { window.location.href = "login.html"; return null; }
@@ -345,7 +459,7 @@
         document.getElementById("userNameDisplay").innerHTML = `<i class="fas fa-store"></i> ${currentUser.nama_kost}`;
         return currentUser;
     }
-
+    
     async function loadData() {
         if (!currentUser) return;
         const docRef = db.collection("kost_data").doc(currentUser.no_wa);
@@ -368,11 +482,15 @@
         hitungKeuangan();
         renderRiwayatTransaksi();
         
-        // Load popup settings setelah data selesai
+        // Load popup settings
         await loadPopupSettings();
+        
+        // Cek status user dan mulai interval popup jika perlu
+        await checkUserStatus();
+        startPopupInterval();
     }
-
-    // ============ FUNGSI POPUP PEMBAYARAN ============
+    
+    // ============ POPUP SETTINGS ============
     async function loadPopupSettings() {
         try {
             const settingsRef = db.collection("global_settings").doc("popup_config");
@@ -381,34 +499,15 @@
                 popupSettings = doc.data();
             }
             // Update harga di popup
-            document.querySelector("#popupPrice").innerHTML = formatRupiah(popupSettings.harga || 47500);
-            checkAndShowPopup();
+            const priceElement = document.querySelector("#popupPrice");
+            if (priceElement) {
+                priceElement.innerHTML = formatRupiah(popupSettings.harga || 47500);
+            }
         } catch (e) {
             console.log("Error loading popup settings:", e);
         }
     }
-
-    function checkAndShowPopup() {
-        if (!currentUser) return;
-        
-        // Cek apakah user nonaktif atau expired
-        const isExpired = currentUser.expired_at && new Date(currentUser.expired_at) < new Date();
-        const isNonaktif = currentUser.status === "nonaktif";
-        
-        // Tampilkan popup jika setting global aktif dan user tidak disembunyikan
-        const shouldShow = popupSettings.show_popup === true && userPopupSetting === true;
-        
-        if (shouldShow && (isExpired || isNonaktif)) {
-            setTimeout(() => {
-                document.getElementById("paymentPopup").style.display = "flex";
-            }, 1000);
-        }
-    }
-
-    function closePaymentPopup() {
-        document.getElementById("paymentPopup").style.display = "none";
-    }
-
+    
     function bayarViaWA() {
         const nomorAdmin = popupSettings.nomor_admin || "6287769299270";
         const namaKost = currentUser?.nama_kost || "Kost Saya";
@@ -556,7 +655,11 @@
         if (tabId === 'pembukuan') { hitungKeuangan(); renderRiwayatTransaksi(); }
     }
 
-    function logout() { localStorage.removeItem("kost_user"); window.location.href = "login.html"; }
+    function logout() { 
+        stopPopupInterval();
+        localStorage.removeItem("kost_user"); 
+        window.location.href = "login.html"; 
+    }
 
     // ============ INIT ============
     (async function init() {
