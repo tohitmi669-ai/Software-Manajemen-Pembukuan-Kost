@@ -25,7 +25,7 @@
         .btn-logout { background: transparent; border: 1px solid #E5E7EB; padding: 8px 16px; border-radius: 40px; color: #6B7280; font-weight: 500; cursor: pointer; transition: all 0.2s; }
         .btn-logout:hover { background: #FEE2E2; border-color: #EF4444; color: #EF4444; }
         
-        /* ============ MENU NAVIGASI MODERN (GRID 2x3) ============ */
+        /* MENU NAVIGASI MODERN GRID 2x3 */
         .nav-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -42,34 +42,16 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             border: 1px solid rgba(139, 92, 246, 0.1);
         }
-        .nav-item:active {
-            transform: scale(0.96);
-        }
+        .nav-item:active { transform: scale(0.96); }
         .nav-item.active {
             background: linear-gradient(135deg, #8B5CF6 0%, #6B21A5 100%);
             border: none;
             box-shadow: 0 8px 20px rgba(107, 33, 168, 0.3);
         }
-        .nav-item.active .nav-icon {
-            color: white;
-        }
-        .nav-item.active .nav-label {
-            color: white;
-        }
-        .nav-icon {
-            font-size: 28px;
-            margin-bottom: 8px;
-            display: block;
-            color: #8B5CF6;
-            transition: all 0.2s;
-        }
-        .nav-label {
-            font-size: 12px;
-            font-weight: 600;
-            color: #4B5563;
-            transition: all 0.2s;
-        }
-        /* Responsive: tablet & desktop tetap 3 kolom */
+        .nav-item.active .nav-icon { color: white; }
+        .nav-item.active .nav-label { color: white; }
+        .nav-icon { font-size: 28px; margin-bottom: 8px; display: block; color: #8B5CF6; transition: all 0.2s; }
+        .nav-label { font-size: 12px; font-weight: 600; color: #4B5563; transition: all 0.2s; }
         @media (max-width: 480px) {
             .nav-icon { font-size: 24px; }
             .nav-label { font-size: 10px; }
@@ -77,7 +59,7 @@
             .nav-grid { gap: 10px; }
         }
         
-        /* CARD & TABEL (sama seperti sebelumnya) */
+        /* CARD & TABEL */
         .card { background: white; border-radius: 24px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); border: 1px solid rgba(139, 92, 246, 0.1); }
         .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
         .stat-card { background: white; border-radius: 18px; padding: 14px; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(139, 92, 246, 0.15); }
@@ -112,6 +94,109 @@
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .profit-positive { color: #10B981; font-weight: bold; }
         .profit-negative { color: #EF4444; font-weight: bold; }
+
+        /* POPUP PEMBAYARAN */
+        .payment-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .payment-popup-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+        }
+        .payment-popup-content {
+            position: relative;
+            background: white;
+            border-radius: 32px;
+            max-width: 400px;
+            width: 90%;
+            overflow: hidden;
+            animation: popupSlideIn 0.3s ease-out;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        @keyframes popupSlideIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .payment-popup-header {
+            background: linear-gradient(135deg, #8B5CF6 0%, #6B21A5 100%);
+            padding: 24px 20px;
+            text-align: center;
+            position: relative;
+            color: white;
+        }
+        .payment-popup-header h2 { margin-top: 8px; font-size: 20px; }
+        .payment-popup-close {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .payment-popup-close:hover { background: rgba(255,255,255,0.3); transform: scale(1.1); }
+        .payment-popup-body { padding: 28px 24px 32px; }
+        .payment-info { text-align: center; margin-bottom: 28px; }
+        .payment-price {
+            background: #F3E8FF;
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .price-label { font-size: 12px; color: #6B21A5; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .price-value { font-size: 36px; font-weight: 800; color: #6B21A5; display: block; margin: 8px 0 4px; }
+        .price-period { font-size: 14px; color: #9CA3AF; }
+        .payment-desc {
+            text-align: left;
+            background: #F9FAFB;
+            padding: 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #374151;
+            line-height: 1.8;
+        }
+        .payment-desc i { color: #10B981; margin-right: 8px; }
+        .payment-btn {
+            width: 100%;
+            padding: 16px;
+            background: #25D366;
+            border: none;
+            border-radius: 48px;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
+            margin-bottom: 16px;
+        }
+        .payment-btn:active { transform: scale(0.97); }
+        .payment-note { font-size: 11px; color: #9CA3AF; text-align: center; }
+        .payment-note i { margin-right: 4px; }
     </style>
 </head>
 <body>
@@ -128,9 +213,9 @@
         </div>
     </div>
 
-    <!-- ============ MENU NAVIGASI MODERN GRID 2x3 ============ -->
+    <!-- MENU NAVIGASI GRID 2x3 -->
     <div class="nav-grid">
-        <div class="nav-item" data-tab="dashboard" onclick="openTab('dashboard')">
+        <div class="nav-item active" data-tab="dashboard" onclick="openTab('dashboard')">
             <i class="fas fa-chart-line nav-icon"></i>
             <span class="nav-label">Dashboard</span>
         </div>
@@ -156,7 +241,7 @@
         </div>
     </div>
 
-    <!-- KONTEN (semua sama persis seperti sebelumnya, hanya id konten yang dipertahankan) -->
+    <!-- KONTEN -->
     <div id="dashboard" class="tab-content active">
         <div class="stats-grid" id="dashboard-stats"></div>
         <div class="card"><h3 style="margin-bottom: 16px;"><i class="fas fa-exclamation-triangle" style="color:#F59E0B;"></i> Penyewa Jatuh Tempo</h3><div class="table-wrapper"><table id="table-jatuh-tempo"><thead><tr><th>Nama</th><th>Kamar</th><th>Jatuh Tempo</th><th>Terlambat</th><th>Aksi</th></tr></thead><tbody></tbody></table></div></div>
@@ -169,6 +254,38 @@
 </div>
 
 <div id="modalNota" class="modal"><div class="modal-content"><span class="close-modal" onclick="closeModal()">&times;</span><div id="nota-preview" style="font-family: monospace; white-space: pre-line;"></div><button class="btn-primary" onclick="kirimWADariModal()" style="width:100%; margin-top: 20px;"><i class="fab fa-whatsapp"></i> Kirim WA</button></div></div>
+
+<!-- POPUP PEMBAYARAN -->
+<div id="paymentPopup" class="payment-popup" style="display: none;">
+    <div class="payment-popup-overlay"></div>
+    <div class="payment-popup-content">
+        <div class="payment-popup-header">
+            <i class="fas fa-gem" style="font-size: 32px; color: white;"></i>
+            <h2>Perpanjang Lisensi</h2>
+            <button class="payment-popup-close" onclick="closePaymentPopup()">&times;</button>
+        </div>
+        <div class="payment-popup-body">
+            <div class="payment-info">
+                <div class="payment-price">
+                    <span class="price-label">Harga Spesial</span>
+                    <span class="price-value" id="popupPrice">Rp 47.500</span>
+                    <span class="price-period">/tahun</span>
+                </div>
+                <p class="payment-desc">
+                    <i class="fas fa-check-circle"></i> Akses penuh semua fitur<br>
+                    <i class="fas fa-check-circle"></i> Update gratis selamanya<br>
+                    <i class="fas fa-check-circle"></i> Support via WhatsApp 24/7
+                </p>
+            </div>
+            <button class="payment-btn" onclick="bayarViaWA()">
+                <i class="fab fa-whatsapp"></i> Bayar via WhatsApp
+            </button>
+            <p class="payment-note">
+                <i class="fas fa-info-circle"></i> Setelah pembayaran, lisensi akan diaktifkan otomatis oleh admin
+            </p>
+        </div>
+    </div>
+</div>
 
 <script>
     // ============ KONFIGURASI FIREBASE ============
@@ -190,6 +307,8 @@
     let transaksiList = [];
     let pengaturan = { nama_kost: "", alamat: "", rekening: "" };
     let pendingNota = null;
+    let popupSettings = { show_popup: false, harga: 47500, nomor_admin: "6287769299270" };
+    let userPopupSetting = true;
 
     // Helper functions
     function formatRupiah(angka) { return "Rp " + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
@@ -207,10 +326,22 @@
         });
     }
 
-    function checkAuth() {
+    async function checkAuth() {
         const savedUser = localStorage.getItem("kost_user");
         if (!savedUser) { window.location.href = "login.html"; return null; }
         currentUser = JSON.parse(savedUser);
+        
+        // Ambil data lengkap user dari Firestore
+        const userDoc = await db.collection("users").doc(currentUser.no_wa).get();
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            currentUser.status = userData.status;
+            currentUser.expired_at = userData.expired_at;
+            currentUser.show_popup = userData.show_popup;
+            localStorage.setItem("kost_user", JSON.stringify(currentUser));
+            userPopupSetting = userData.show_popup !== false;
+        }
+        
         document.getElementById("userNameDisplay").innerHTML = `<i class="fas fa-store"></i> ${currentUser.nama_kost}`;
         return currentUser;
     }
@@ -236,8 +367,60 @@
         renderTabelPenyewa();
         hitungKeuangan();
         renderRiwayatTransaksi();
+        
+        // Load popup settings setelah data selesai
+        await loadPopupSettings();
     }
 
+    // ============ FUNGSI POPUP PEMBAYARAN ============
+    async function loadPopupSettings() {
+        try {
+            const settingsRef = db.collection("global_settings").doc("popup_config");
+            const doc = await settingsRef.get();
+            if (doc.exists) {
+                popupSettings = doc.data();
+            }
+            // Update harga di popup
+            document.querySelector("#popupPrice").innerHTML = formatRupiah(popupSettings.harga || 47500);
+            checkAndShowPopup();
+        } catch (e) {
+            console.log("Error loading popup settings:", e);
+        }
+    }
+
+    function checkAndShowPopup() {
+        if (!currentUser) return;
+        
+        // Cek apakah user nonaktif atau expired
+        const isExpired = currentUser.expired_at && new Date(currentUser.expired_at) < new Date();
+        const isNonaktif = currentUser.status === "nonaktif";
+        
+        // Tampilkan popup jika setting global aktif dan user tidak disembunyikan
+        const shouldShow = popupSettings.show_popup === true && userPopupSetting === true;
+        
+        if (shouldShow && (isExpired || isNonaktif)) {
+            setTimeout(() => {
+                document.getElementById("paymentPopup").style.display = "flex";
+            }, 1000);
+        }
+    }
+
+    function closePaymentPopup() {
+        document.getElementById("paymentPopup").style.display = "none";
+    }
+
+    function bayarViaWA() {
+        const nomorAdmin = popupSettings.nomor_admin || "6287769299270";
+        const namaKost = currentUser?.nama_kost || "Kost Saya";
+        const noWaUser = currentUser?.no_wa || "";
+        
+        const pesan = `Halo admin, saya *${namaKost}* (WA: ${noWaUser}) mau melakukan pembayaran aplikasi *KostManager Pro* untuk 1 tahun. Mohon info petunjuk pembayaran. Terima kasih.`;
+        
+        const encodedPesan = encodeURIComponent(pesan);
+        window.open(`https://wa.me/${nomorAdmin}?text=${encodedPesan}`, "_blank");
+    }
+
+    // ============ RENDER FUNCTIONS ============
     async function renderDashboard() {
         let terlambat = penyewaList.filter(p => cekStatus(p.jatuh_tempo) !== "lunas");
         let totalKamar = kamarList.length, terisi = kamarList.filter(k => k.status === "terisi").length;
@@ -317,6 +500,7 @@
         }
     }
 
+    // ============ CRUD FUNCTIONS ============
     async function tambahPenyewa() {
         let nama = document.getElementById("nama").value, no_wa = document.getElementById("nowa").value, kamar_id = document.getElementById("kamar_id").value, tgl = document.getElementById("tgl_masuk").value;
         if (!nama || !no_wa || !kamar_id || !tgl) { alert("Isi semua data!"); return; }
@@ -337,6 +521,7 @@
     async function hapusTransaksi(id) { if (confirm("Hapus transaksi?")) { transaksiList = transaksiList.filter(t => t.id !== id); await saveToFirebase(); renderRiwayatTransaksi(); hitungKeuangan(); } }
     async function simpanPengaturan() { pengaturan.nama_kost = document.getElementById("setting_nama_kost").value; pengaturan.alamat = document.getElementById("setting_alamat").value; pengaturan.rekening = document.getElementById("setting_rekening").value; await saveToFirebase(); alert("Pengaturan disimpan!"); }
 
+    // ============ NOTA & WA ============
     function buatNota(penyewa) {
         let kamar = kamarList.find(k => k.id === penyewa.kamar_id);
         let terlambat = hitungTerlambat(penyewa.jatuh_tempo);
@@ -348,6 +533,7 @@
     function closeModal() { document.getElementById("modalNota").style.display = "none"; pendingNota = null; }
     function kirimWADariModal() { if (pendingNota) { let pesan = encodeURIComponent(buatNota(pendingNota)); window.open(`https://wa.me/${pendingNota.no_wa}?text=${pesan}`, "_blank"); closeModal(); } }
 
+    // ============ PDF ============
     function downloadPDFLaporanKeuangan() {
         const element = document.getElementById("pembukuan").cloneNode(true);
         const btn = element.querySelector('button[onclick="downloadPDFLaporanKeuangan()"]');
@@ -358,6 +544,7 @@
         html2pdf().set({ margin: 0.5, filename: `Laporan_Keuangan_${new Date().toISOString().slice(0,10)}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } }).from(element).save();
     }
 
+    // ============ NAVIGATION ============
     function openTab(tabId) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
@@ -371,7 +558,12 @@
 
     function logout() { localStorage.removeItem("kost_user"); window.location.href = "login.html"; }
 
-    if (checkAuth()) { loadData(); }
+    // ============ INIT ============
+    (async function init() {
+        if (await checkAuth()) {
+            await loadData();
+        }
+    })();
 </script>
 </body>
 </html>
