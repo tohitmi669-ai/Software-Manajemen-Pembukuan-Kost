@@ -12,39 +12,111 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #f3f4f6; padding: 20px; }
         .container { max-width: 1400px; margin: 0 auto; }
-        .header { background: linear-gradient(135deg, #1F2937 0%, #111827 100%); color: white; padding: 20px; border-radius: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .header { background: linear-gradient(135deg, #1F2937 0%, #111827 100%); color: white; padding: 20px; border-radius: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
         .stat-card { background: white; padding: 20px; border-radius: 16px; display: flex; align-items: center; gap: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .stat-icon { width: 48px; height: 48px; background: #8B5CF6; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; }
-        .card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; }
+        .card { background: white; border-radius: 20px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .card h3 { margin-bottom: 20px; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+        .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #E5E7EB; flex-wrap: wrap; gap: 16px; }
+        .toggle-switch { position: relative; display: inline-block; width: 52px; height: 28px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: 0.3s; border-radius: 34px; }
+        .toggle-slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 3px; background-color: white; transition: 0.3s; border-radius: 50%; }
+        input:checked + .toggle-slider { background-color: #8B5CF6; }
+        input:checked + .toggle-slider:before { transform: translateX(24px); }
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 12px; background: #F9FAFB; }
-        td { padding: 12px; border-bottom: 1px solid #E5E7EB; }
-        .btn-sm { padding: 6px 12px; border-radius: 8px; border: none; cursor: pointer; margin: 2px; font-size: 12px; }
+        th { text-align: left; padding: 12px; background: #F9FAFB; font-weight: 600; font-size: 13px; }
+        td { padding: 12px; border-bottom: 1px solid #E5E7EB; font-size: 13px; }
+        .btn-sm { padding: 6px 12px; border-radius: 8px; border: none; cursor: pointer; margin: 2px; font-size: 12px; font-weight: 500; transition: all 0.2s; }
+        .btn-sm:active { transform: scale(0.95); }
         .btn-danger { background: #EF4444; color: white; }
         .btn-warning { background: #F59E0B; color: white; }
         .btn-success { background: #10B981; color: white; }
-        .search-box { padding: 10px 16px; border: 1px solid #E5E7EB; border-radius: 40px; width: 300px; margin-bottom: 16px; }
+        .btn-primary { background: #8B5CF6; color: white; }
+        .btn-outline-admin { background: transparent; border: 1px solid #8B5CF6; color: #8B5CF6; }
+        .search-box { padding: 10px 16px; border: 1px solid #E5E7EB; border-radius: 40px; width: 100%; max-width: 300px; margin-bottom: 16px; font-size: 14px; }
         .badge { padding: 4px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
         .badge-active { background: #DCFCE7; color: #15803D; }
         .badge-inactive { background: #FEE2E2; color: #B91C1C; }
+        .badge-show { background: #DBEAFE; color: #1E40AF; }
+        .badge-hide { background: #FEF3C7; color: #92400E; }
+        .table-wrapper { overflow-x: auto; }
+        .input-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .input-group input { padding: 8px 12px; border: 1px solid #E5E7EB; border-radius: 12px; font-size: 14px; }
+        @media (max-width: 768px) {
+            body { padding: 12px; }
+            .setting-item { flex-direction: column; align-items: flex-start; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <div><h1><i class="fas fa-crown"></i> Admin Panel KostManager Pro</h1><p>Kelola semua user pemilik kost</p></div>
+        <div>
+            <h1><i class="fas fa-crown"></i> Admin Panel KostManager Pro</h1>
+            <p style="font-size: 13px; opacity: 0.8; margin-top: 4px;">Kelola user, lisensi, dan pengaturan popup pembayaran</p>
+        </div>
         <button class="btn-sm" style="background:#EF4444; color:white;" onclick="logoutAdmin()"><i class="fas fa-sign-out-alt"></i> Logout</button>
     </div>
 
+    <!-- STATISTIK -->
     <div class="stats-grid" id="adminStats"></div>
 
+    <!-- PENGATURAN POPUP -->
     <div class="card">
-        <h3 style="margin-bottom: 16px;"><i class="fas fa-users"></i> Daftar Semua User</h3>
-        <input type="text" id="searchUser" class="search-box" placeholder="Cari nama kost atau nomor WA..." onkeyup="filterUsers()">
+        <h3><i class="fas fa-bell"></i> Pengaturan Popup Pembayaran</h3>
+        <div class="setting-item">
+            <div>
+                <strong><i class="fas fa-toggle-on"></i> Tampilkan Popup ke Semua User</strong>
+                <p style="font-size: 12px; color: #6B7280; margin-top: 4px;">Aktifkan untuk menampilkan popup pembayaran. Nonaktifkan untuk menyembunyikan.</p>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="popupToggle" onchange="togglePopupSetting()">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        <div class="setting-item">
+            <div>
+                <strong><i class="fas fa-tag"></i> Harga Lisensi (Rp)</strong>
+                <p style="font-size: 12px; color: #6B7280;">Harga yang muncul di popup user</p>
+            </div>
+            <div class="input-group">
+                <input type="number" id="hargaSetting" value="47500" style="width: 150px;">
+                <button class="btn-sm btn-primary" onclick="updateHarga()">Simpan</button>
+            </div>
+        </div>
+        <div class="setting-item">
+            <div>
+                <strong><i class="fab fa-whatsapp"></i> Nomor Admin WhatsApp</strong>
+                <p style="font-size: 12px; color: #6B7280;">Nomor tujuan saat user klik "Bayar via WhatsApp"</p>
+            </div>
+            <div class="input-group">
+                <input type="text" id="nomorAdminSetting" value="6287769299270" style="width: 200px;">
+                <button class="btn-sm btn-primary" onclick="updateNomorAdmin()">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DAFTAR USER -->
+    <div class="card">
+        <h3><i class="fas fa-users"></i> Daftar Semua User</h3>
+        <input type="text" id="searchUser" class="search-box" placeholder="🔍 Cari nama kost atau nomor WA..." onkeyup="filterUsers()">
         <div class="table-wrapper">
             <table id="userTable">
-                <thead><tr><th>No WA</th><th>Nama Kost</th><th>Status</th><th>Expired</th><th>Terdaftar</th><th>Last Login</th><th>Aksi</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>No WA</th>
+                        <th>Nama Kost</th>
+                        <th>Status</th>
+                        <th>Expired</th>
+                        <th>Popup</th>
+                        <th>Terdaftar</th>
+                        <th>Last Login</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
                 <tbody id="userTableBody"></tbody>
             </table>
         </div>
@@ -52,6 +124,7 @@
 </div>
 
 <script>
+    // ============ KONFIGURASI FIREBASE ============
     const firebaseConfig = {
         apiKey: "AIzaSyCrVmYmY6kktOjbhuc5I3LlqbgxzwWUoSI",
         authDomain: "manajemen-kost-68569.firebaseapp.com",
@@ -66,6 +139,55 @@
 
     let allUsers = [];
 
+    // ============ PENGATURAN POPUP ============
+    async function loadPopupSettings() {
+        const settingsRef = db.collection("global_settings").doc("popup_config");
+        const doc = await settingsRef.get();
+        if (doc.exists) {
+            const data = doc.data();
+            document.getElementById("popupToggle").checked = data.show_popup === true;
+            document.getElementById("hargaSetting").value = data.harga || 47500;
+            document.getElementById("nomorAdminSetting").value = data.nomor_admin || "6287769299270";
+        } else {
+            await settingsRef.set({
+                show_popup: false,
+                harga: 47500,
+                nomor_admin: "6287769299270",
+                created_at: new Date().toISOString()
+            });
+        }
+    }
+
+    async function togglePopupSetting() {
+        const isChecked = document.getElementById("popupToggle").checked;
+        await db.collection("global_settings").doc("popup_config").update({
+            show_popup: isChecked,
+            updated_at: new Date().toISOString()
+        });
+        alert(`Popup ${isChecked ? "diaktifkan" : "dinonaktifkan"} untuk semua user!`);
+    }
+
+    async function updateHarga() {
+        const harga = parseInt(document.getElementById("hargaSetting").value);
+        if (isNaN(harga)) { alert("Masukkan harga yang valid!"); return; }
+        await db.collection("global_settings").doc("popup_config").update({
+            harga: harga,
+            updated_at: new Date().toISOString()
+        });
+        alert("Harga berhasil diupdate!");
+    }
+
+    async function updateNomorAdmin() {
+        const nomor = document.getElementById("nomorAdminSetting").value;
+        if (!nomor) { alert("Masukkan nomor WhatsApp!"); return; }
+        await db.collection("global_settings").doc("popup_config").update({
+            nomor_admin: nomor,
+            updated_at: new Date().toISOString()
+        });
+        alert("Nomor admin berhasil diupdate!");
+    }
+
+    // ============ MANAJEMEN USER ============
     async function loadUsers() {
         const snapshot = await db.collection("users").get();
         allUsers = [];
@@ -79,33 +201,48 @@
     function updateStats() {
         const active = allUsers.filter(u => u.status === "aktif").length;
         const expired = allUsers.filter(u => u.expired_at && new Date(u.expired_at) < new Date()).length;
+        const total = allUsers.length;
         document.getElementById("adminStats").innerHTML = `
-            <div class="stat-card"><div class="stat-icon"><i class="fas fa-users"></i></div><div><h3>${allUsers.length}</h3><p>Total User</p></div></div>
+            <div class="stat-card"><div class="stat-icon"><i class="fas fa-users"></i></div><div><h3>${total}</h3><p>Total User</p></div></div>
             <div class="stat-card"><div class="stat-icon"><i class="fas fa-check-circle"></i></div><div><h3>${active}</h3><p>Aktif</p></div></div>
             <div class="stat-card"><div class="stat-icon"><i class="fas fa-clock"></i></div><div><h3>${expired}</h3><p>Expired</p></div></div>
-            <div class="stat-card"><div class="stat-icon"><i class="fas fa-building"></i></div><div><h3>${allUsers.length}</h3><p>Total Kost</p></div></div>
+            <div class="stat-card"><div class="stat-icon"><i class="fas fa-building"></i></div><div><h3>${total}</h3><p>Total Kost</p></div></div>
         `;
     }
 
     function renderUserTable() {
         const search = document.getElementById("searchUser")?.value.toLowerCase() || "";
-        const filtered = allUsers.filter(u => u.nama_kost?.toLowerCase().includes(search) || u.no_wa?.includes(search));
+        const filtered = allUsers.filter(u => 
+            u.nama_kost?.toLowerCase().includes(search) || 
+            u.no_wa?.includes(search)
+        );
         const tbody = document.getElementById("userTableBody");
         tbody.innerHTML = "";
+        
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px;">Tidak ada user ditemukan</td></tr>';
+            return;
+        }
+        
         filtered.forEach(user => {
             const isExpired = user.expired_at && new Date(user.expired_at) < new Date();
+            const showPopupStatus = user.show_popup === false ? 'disembunyikan' : 'muncul';
+            const showPopupBadge = user.show_popup === false ? 'badge-hide' : 'badge-show';
+            
             tbody.innerHTML += `
                 <tr>
-                    <td>${user.no_wa}</td>
-                    <td><strong>${user.nama_kost || '-'}</strong></td>
+                    <td><strong>${user.no_wa}</strong></td>
+                    <td>${user.nama_kost || '-'}</td>
                     <td><span class="badge ${user.status === 'aktif' ? 'badge-active' : 'badge-inactive'}">${user.status === 'aktif' ? '✅ Aktif' : '❌ Nonaktif'}</span></td>
                     <td>${user.expired_at || '-'} ${isExpired ? '<span class="badge badge-inactive">Expired</span>' : ''}</td>
-                    <td>${new Date(user.created_at).toLocaleDateString('id')}</td>
+                    <td><span class="badge ${showPopupBadge}">👀 ${showPopupStatus}</span></td>
+                    <td>${user.created_at ? new Date(user.created_at).toLocaleDateString('id') : '-'}</td>
                     <td>${user.last_login ? new Date(user.last_login).toLocaleString('id') : '-'}</td>
                     <td>
-                        <button class="btn-sm btn-success" onclick="perpanjangLisensi('${user.no_wa}')"><i class="fas fa-calendar-plus"></i> Perpanjang</button>
-                        <button class="btn-sm btn-warning" onclick="toggleStatus('${user.no_wa}', '${user.status}')"><i class="fas fa-power-off"></i> ${user.status === 'aktif' ? 'Nonaktifkan' : 'Aktifkan'}</button>
-                        <button class="btn-sm btn-danger" onclick="hapusUser('${user.no_wa}')"><i class="fas fa-trash"></i> Hapus</button>
+                        <button class="btn-sm btn-success" onclick="perpanjangLisensi('${user.no_wa}')" title="Perpanjang 1 tahun"><i class="fas fa-calendar-plus"></i></button>
+                        <button class="btn-sm btn-warning" onclick="toggleStatus('${user.no_wa}', '${user.status}')" title="${user.status === 'aktif' ? 'Nonaktifkan' : 'Aktifkan'}"><i class="fas fa-power-off"></i></button>
+                        <button class="btn-sm btn-primary" onclick="togglePopupUser('${user.no_wa}', ${user.show_popup === false})" title="${user.show_popup === false ? 'Tampilkan popup' : 'Sembunyikan popup'}"><i class="fas fa-bell${user.show_popup === false ? '-slash' : ''}"></i></button>
+                        <button class="btn-sm btn-danger" onclick="hapusUser('${user.no_wa}')" title="Hapus user"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>
             `;
@@ -113,6 +250,7 @@
     }
 
     async function perpanjangLisensi(noWa) {
+        if (!confirm(`Perpanjang lisensi untuk ${noWa} selama 1 tahun?`)) return;
         const expiredDate = new Date();
         expiredDate.setFullYear(expiredDate.getFullYear() + 1);
         await db.collection("users").doc(noWa).update({
@@ -125,27 +263,58 @@
 
     async function toggleStatus(noWa, currentStatus) {
         const newStatus = currentStatus === "aktif" ? "nonaktif" : "aktif";
+        const action = newStatus === "aktif" ? "mengaktifkan" : "menonaktifkan";
+        if (!confirm(`Yakin ingin ${action} user ${noWa}?`)) return;
         await db.collection("users").doc(noWa).update({ status: newStatus });
-        alert(`User ${newStatus === "aktif" ? "diaktifkan" : "dinonaktifkan"}`);
+        alert(`User berhasil ${action}!`);
+        loadUsers();
+    }
+
+    async function togglePopupUser(noWa, currentShow) {
+        // currentShow = true berarti sekarang disembunyikan (show_popup = false), kita akan ubah jadi muncul
+        const newShowValue = !currentShow; // jika sekarang false, jadi true; jika true, jadi false
+        const action = newShowValue ? "ditampilkan" : "disembunyikan";
+        await db.collection("users").doc(noWa).update({ show_popup: newShowValue });
+        alert(`Popup untuk user ini ${action}`);
         loadUsers();
     }
 
     async function hapusUser(noWa) {
-        if (confirm(`Hapus user ${noWa}? Semua datanya akan hilang!`)) {
-            await db.collection("users").doc(noWa).delete();
-            await db.collection("kost_data").doc(noWa).delete();
-            alert("User berhasil dihapus!");
-            loadUsers();
-        }
+        if (!confirm(`⚠️ PERINGATAN! Hapus user ${noWa}?\nSemua data kost akan hilang permanen!`)) return;
+        if (!confirm(`Ketik "HAPUS" untuk konfirmasi penghapusan user ${noWa}`)) return;
+        await db.collection("users").doc(noWa).delete();
+        await db.collection("kost_data").doc(noWa).delete();
+        alert("User berhasil dihapus!");
+        loadUsers();
     }
 
     function filterUsers() { renderUserTable(); }
-
+    
     function logoutAdmin() {
+        localStorage.removeItem("kost_user");
         window.location.href = "login.html";
     }
 
-    loadUsers();
+    // ============ CEK APAKAH ADMIN (sederhana) ============
+    async function checkAdmin() {
+        const savedUser = localStorage.getItem("kost_user");
+        if (!savedUser) {
+            window.location.href = "login.html";
+            return false;
+        }
+        const user = JSON.parse(savedUser);
+        // Cek apakah user ini admin (bisa juga dari email atau role)
+        // Untuk sementara, kita izinkan akses ke admin panel (kamu bisa tambahkan validasi khusus)
+        return true;
+    }
+
+    // ============ INIT ============
+    (async function init() {
+        if (await checkAdmin()) {
+            await loadPopupSettings();
+            await loadUsers();
+        }
+    })();
 </script>
 </body>
 </html>
