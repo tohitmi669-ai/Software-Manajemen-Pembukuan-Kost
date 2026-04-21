@@ -14,21 +14,71 @@
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #e9edf2 100%); min-height: 100vh; padding: 12px; padding-bottom: 20px; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #e9edf2 100%); min-height: 100vh; padding: 16px; padding-bottom: 30px; }
         .container { max-width: 1400px; margin: 0 auto; }
-        .header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 24px; padding: 16px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); }
+        
+        /* HEADER */
+        .header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 28px; padding: 16px 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); border: 1px solid rgba(255,255,255,0.5); }
         .logo-area h1 { font-size: 20px; font-weight: 700; background: linear-gradient(135deg, #6B21A5 0%, #8B5CF6 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
         .logo-area p { font-size: 11px; color: #6B7280; margin-top: 2px; }
-        .user-info { background: #F3E8FF; padding: 6px 14px; border-radius: 40px; font-size: 12px; font-weight: 500; color: #6B21A5; }
-        .btn-primary, .btn-outline, .btn-sm, .tab-btn { min-height: 44px; cursor: pointer; transition: all 0.15s ease; }
-        .btn-primary:active, .btn-outline:active, .btn-sm:active, .tab-btn:active { transform: scale(0.94); }
-        .btn-primary { background: linear-gradient(135deg, #8B5CF6 0%, #6B21A5 100%); color: white; border: none; padding: 10px 18px; border-radius: 40px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
-        .btn-outline { background: transparent; border: 1.5px solid #8B5CF6; color: #6B21A5; padding: 8px 16px; border-radius: 40px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
-        .btn-danger { background: #EF4444; color: white; border: none; padding: 10px 18px; border-radius: 40px; font-weight: 600; }
-        .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: rgba(255,255,255,0.6); backdrop-filter: blur(8px); padding: 6px; border-radius: 60px; overflow-x: auto; scrollbar-width: thin; }
-        .tab-btn { padding: 10px 18px; background: transparent; border: none; border-radius: 40px; font-weight: 600; font-size: 12px; color: #4B5563; display: flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; }
-        .tab-btn.active { background: linear-gradient(135deg, #8B5CF6 0%, #6B21A5 100%); color: white; }
-        .card { background: white; border-radius: 20px; padding: 18px; margin-bottom: 18px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); }
+        .user-info { background: #F3E8FF; padding: 8px 16px; border-radius: 40px; font-size: 12px; font-weight: 600; color: #6B21A5; display: flex; align-items: center; gap: 8px; }
+        .btn-logout { background: transparent; border: 1px solid #E5E7EB; padding: 8px 16px; border-radius: 40px; color: #6B7280; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+        .btn-logout:hover { background: #FEE2E2; border-color: #EF4444; color: #EF4444; }
+        
+        /* ============ MENU NAVIGASI MODERN (GRID 2x3) ============ */
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+        .nav-item {
+            background: white;
+            border-radius: 24px;
+            padding: 16px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(139, 92, 246, 0.1);
+        }
+        .nav-item:active {
+            transform: scale(0.96);
+        }
+        .nav-item.active {
+            background: linear-gradient(135deg, #8B5CF6 0%, #6B21A5 100%);
+            border: none;
+            box-shadow: 0 8px 20px rgba(107, 33, 168, 0.3);
+        }
+        .nav-item.active .nav-icon {
+            color: white;
+        }
+        .nav-item.active .nav-label {
+            color: white;
+        }
+        .nav-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+            display: block;
+            color: #8B5CF6;
+            transition: all 0.2s;
+        }
+        .nav-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #4B5563;
+            transition: all 0.2s;
+        }
+        /* Responsive: tablet & desktop tetap 3 kolom */
+        @media (max-width: 480px) {
+            .nav-icon { font-size: 24px; }
+            .nav-label { font-size: 10px; }
+            .nav-item { padding: 12px 6px; }
+            .nav-grid { gap: 10px; }
+        }
+        
+        /* CARD & TABEL (sama seperti sebelumnya) */
+        .card { background: white; border-radius: 24px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); border: 1px solid rgba(139, 92, 246, 0.1); }
         .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
         .stat-card { background: white; border-radius: 18px; padding: 14px; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(139, 92, 246, 0.15); }
         .stat-icon { width: 44px; height: 44px; background: linear-gradient(135deg, #F3E8FF 0%, #E9D5FF 100%); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #6B21A5; }
@@ -46,7 +96,12 @@
         .form-group { margin-bottom: 16px; }
         .form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: #374151; font-size: 13px; }
         .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 14px; border: 1.5px solid #E5E7EB; border-radius: 14px; font-size: 14px; font-family: 'Inter', sans-serif; }
-        .btn-sm { padding: 6px 12px; font-size: 11px; border-radius: 30px; border: none; font-weight: 500; cursor: pointer; margin: 2px; display: inline-flex; align-items: center; gap: 4px; }
+        .btn-primary, .btn-outline, .btn-sm { min-height: 44px; cursor: pointer; transition: all 0.15s ease; border: none; border-radius: 40px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; justify-content: center; }
+        .btn-primary:active, .btn-outline:active, .btn-sm:active { transform: scale(0.96); }
+        .btn-primary { background: linear-gradient(135deg, #8B5CF6 0%, #6B21A5 100%); color: white; padding: 10px 18px; font-size: 13px; box-shadow: 0 4px 12px rgba(107, 33, 168, 0.25); }
+        .btn-outline { background: transparent; border: 1.5px solid #8B5CF6; color: #6B21A5; padding: 8px 16px; font-size: 13px; }
+        .btn-danger { background: #EF4444; color: white; border: none; padding: 10px 18px; border-radius: 40px; font-weight: 600; }
+        .btn-sm { padding: 6px 12px; font-size: 11px; margin: 2px; }
         .btn-wa { background: #25D366; color: white; }
         .btn-success { background: #10B981; color: white; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); justify-content: center; align-items: center; z-index: 1000; }
@@ -57,7 +112,6 @@
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .profit-positive { color: #10B981; font-weight: bold; }
         .profit-negative { color: #EF4444; font-weight: bold; }
-        @media (max-width: 480px) { body { padding: 10px; } .stat-card { padding: 10px; gap: 8px; } .stat-icon { width: 38px; height: 38px; font-size: 18px; } .stat-info h3 { font-size: 18px; } }
     </style>
 </head>
 <body>
@@ -68,22 +122,45 @@
             <h1><i class="fas fa-building"></i> KostManager Pro</h1>
             <p>Manajemen Kost + Pembukuan Lengkap</p>
         </div>
-        <div class="action-buttons">
-            <span class="user-info" id="userNameDisplay"></span>
-            <button class="btn-outline" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        <div class="action-buttons" style="display: flex; gap: 8px; align-items: center;">
+            <span class="user-info" id="userNameDisplay"><i class="fas fa-store"></i> Memuat...</span>
+            <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Keluar</button>
         </div>
     </div>
 
-    <div class="tabs">
-        <button class="tab-btn active" data-tab="dashboard" onclick="openTab('dashboard')"><i class="fas fa-chart-line"></i> Dashboard</button>
-        <button class="tab-btn" data-tab="penyewa" onclick="openTab('penyewa')"><i class="fas fa-users"></i> Penyewa</button>
-        <button class="tab-btn" data-tab="tambah" onclick="openTab('tambah')"><i class="fas fa-plus-circle"></i> Tambah</button>
-        <button class="tab-btn" data-tab="kamar" onclick="openTab('kamar')"><i class="fas fa-door-open"></i> Kamar</button>
-        <button class="tab-btn" data-tab="pembukuan" onclick="openTab('pembukuan')"><i class="fas fa-book"></i> Pembukuan</button>
-        <button class="tab-btn" data-tab="pengaturan" onclick="openTab('pengaturan')"><i class="fas fa-sliders-h"></i> Setelan</button>
+    <!-- ============ MENU NAVIGASI MODERN GRID 2x3 ============ -->
+    <div class="nav-grid">
+        <div class="nav-item" data-tab="dashboard" onclick="openTab('dashboard')">
+            <i class="fas fa-chart-line nav-icon"></i>
+            <span class="nav-label">Dashboard</span>
+        </div>
+        <div class="nav-item" data-tab="penyewa" onclick="openTab('penyewa')">
+            <i class="fas fa-users nav-icon"></i>
+            <span class="nav-label">Penyewa</span>
+        </div>
+        <div class="nav-item" data-tab="tambah" onclick="openTab('tambah')">
+            <i class="fas fa-user-plus nav-icon"></i>
+            <span class="nav-label">Tambah</span>
+        </div>
+        <div class="nav-item" data-tab="kamar" onclick="openTab('kamar')">
+            <i class="fas fa-door-open nav-icon"></i>
+            <span class="nav-label">Kamar</span>
+        </div>
+        <div class="nav-item" data-tab="pembukuan" onclick="openTab('pembukuan')">
+            <i class="fas fa-book nav-icon"></i>
+            <span class="nav-label">Pembukuan</span>
+        </div>
+        <div class="nav-item" data-tab="pengaturan" onclick="openTab('pengaturan')">
+            <i class="fas fa-sliders-h nav-icon"></i>
+            <span class="nav-label">Setelan</span>
+        </div>
     </div>
 
-    <div id="dashboard" class="tab-content active"><div class="stats-grid" id="dashboard-stats"></div><div class="card"><h3><i class="fas fa-exclamation-triangle" style="color:#F59E0B;"></i> Penyewa Jatuh Tempo</h3><div class="table-wrapper"><table id="table-jatuh-tempo"><thead><tr><th>Nama</th><th>Kamar</th><th>Jatuh Tempo</th><th>Terlambat</th><th>Aksi</th></tr></thead><tbody></tbody></table></div></div></div>
+    <!-- KONTEN (semua sama persis seperti sebelumnya, hanya id konten yang dipertahankan) -->
+    <div id="dashboard" class="tab-content active">
+        <div class="stats-grid" id="dashboard-stats"></div>
+        <div class="card"><h3 style="margin-bottom: 16px;"><i class="fas fa-exclamation-triangle" style="color:#F59E0B;"></i> Penyewa Jatuh Tempo</h3><div class="table-wrapper"><table id="table-jatuh-tempo"><thead><tr><th>Nama</th><th>Kamar</th><th>Jatuh Tempo</th><th>Terlambat</th><th>Aksi</th></tr></thead><tbody></tbody></table></div></div>
+    </div>
     <div id="penyewa" class="tab-content"><div class="card"><div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 16px;"><h3><i class="fas fa-users"></i> Semua Penyewa</h3><input type="text" id="search-penyewa" placeholder="Cari nama/kamar..." style="padding: 8px 14px; border-radius: 40px; border:1px solid #E5E7EB;"></div><div class="table-wrapper"><table id="table-penyewa"><thead><tr><th>Nama</th><th>Kamar</th><th>WA</th><th>Jatuh Tempo</th><th>Status</th><th>Aksi</th></tr></thead><tbody></tbody></table></div></div></div>
     <div id="tambah" class="tab-content"><div class="card"><h3><i class="fas fa-user-plus"></i> Form Pendaftaran Penyewa</h3><div class="form-group"><label>Nama Lengkap</label><input type="text" id="nama" placeholder="Contoh: Budi Santoso"></div><div class="form-group"><label>Nomor WhatsApp</label><input type="text" id="nowa" placeholder="6281234567890"></div><div class="form-group"><label>Pilih Kamar</label><select id="kamar_id"></select></div><div class="form-group"><label>Tanggal Masuk</label><input type="date" id="tgl_masuk"></div><div class="form-group"><label>Harga Sewa</label><input type="text" id="harga" readonly style="background:#F9FAFB;"></div><button class="btn-primary" onclick="tambahPenyewa()" style="width:100%;"><i class="fas fa-save"></i> Simpan Penyewa</button></div></div>
     <div id="kamar" class="tab-content"><div class="card"><h3><i class="fas fa-plus-circle"></i> Tambah Kamar Baru</h3><div style="display: flex; gap: 10px; flex-wrap: wrap;"><div style="flex:1"><input type="text" id="nomor_kamar" placeholder="Nomor Kamar (A01)"></div><div style="flex:1"><input type="number" id="harga_kamar" placeholder="Harga per bulan"></div><button class="btn-primary" onclick="tambahKamar()"><i class="fas fa-door-open"></i> Tambah</button></div></div><div class="card"><h3><i class="fas fa-list"></i> Daftar Kamar</h3><div class="table-wrapper"><table id="table-kamar"><thead><tr><th>Kamar</th><th>Harga</th><th>Status</th><th>Aksi</th></tr></thead><tbody></tbody></table></div></div></div>
@@ -94,6 +171,7 @@
 <div id="modalNota" class="modal"><div class="modal-content"><span class="close-modal" onclick="closeModal()">&times;</span><div id="nota-preview" style="font-family: monospace; white-space: pre-line;"></div><button class="btn-primary" onclick="kirimWADariModal()" style="width:100%; margin-top: 20px;"><i class="fab fa-whatsapp"></i> Kirim WA</button></div></div>
 
 <script>
+    // ============ KONFIGURASI FIREBASE ============
     const firebaseConfig = {
         apiKey: "AIzaSyCrVmYmY6kktOjbhuc5I3LlqbgxzwWUoSI",
         authDomain: "manajemen-kost-68569.firebaseapp.com",
@@ -113,12 +191,25 @@
     let pengaturan = { nama_kost: "", alamat: "", rekening: "" };
     let pendingNota = null;
 
+    // Helper functions
+    function formatRupiah(angka) { return "Rp " + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
+    function hitungJatuhTempo(tglMasuk) { let d = new Date(tglMasuk); d.setDate(d.getDate() + 30); return d.toISOString().split('T')[0]; }
+    function cekStatus(jatuhTempo) { let today = new Date().toISOString().split('T')[0]; if (jatuhTempo < today) return "terlambat"; if (jatuhTempo === today) return "jatuh"; return "lunas"; }
+    function hitungTerlambat(jatuhTempo) { let today = new Date(), jt = new Date(jatuhTempo); if (today > jt) return Math.floor((today - jt) / (1000 * 60 * 60 * 24)); return 0; }
+
+    async function saveToFirebase() {
+        if (!currentUser) return;
+        await db.collection("kost_data").doc(currentUser.no_wa).set({
+            penyewa: penyewaList,
+            kamar: kamarList,
+            transaksi: transaksiList,
+            pengaturan: pengaturan
+        });
+    }
+
     function checkAuth() {
         const savedUser = localStorage.getItem("kost_user");
-        if (!savedUser) {
-            window.location.href = "login.html";
-            return null;
-        }
+        if (!savedUser) { window.location.href = "login.html"; return null; }
         currentUser = JSON.parse(savedUser);
         document.getElementById("userNameDisplay").innerHTML = `<i class="fas fa-store"></i> ${currentUser.nama_kost}`;
         return currentUser;
@@ -147,21 +238,6 @@
         renderRiwayatTransaksi();
     }
 
-    async function saveToFirebase() {
-        if (!currentUser) return;
-        await db.collection("kost_data").doc(currentUser.no_wa).set({
-            penyewa: penyewaList,
-            kamar: kamarList,
-            transaksi: transaksiList,
-            pengaturan: pengaturan
-        });
-    }
-
-    function hitungJatuhTempo(tglMasuk) { let d = new Date(tglMasuk); d.setDate(d.getDate() + 30); return d.toISOString().split('T')[0]; }
-    function cekStatus(jatuhTempo) { let today = new Date().toISOString().split('T')[0]; if (jatuhTempo < today) return "terlambat"; if (jatuhTempo === today) return "jatuh"; return "lunas"; }
-    function hitungTerlambat(jatuhTempo) { let today = new Date(), jt = new Date(jatuhTempo); if (today > jt) return Math.floor((today - jt) / (1000 * 60 * 60 * 24)); return 0; }
-    function formatRupiah(angka) { return "Rp " + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
-
     async function renderDashboard() {
         let terlambat = penyewaList.filter(p => cekStatus(p.jatuh_tempo) !== "lunas");
         let totalKamar = kamarList.length, terisi = kamarList.filter(k => k.status === "terisi").length;
@@ -178,7 +254,7 @@
             terlambat.forEach(p => {
                 let kamar = kamarList.find(k => k.id === p.kamar_id);
                 let terl = hitungTerlambat(p.jatuh_tempo);
-                tbody.innerHTML += `<tr><td>${p.nama}</td><td>${kamar?.nomor}</td><td>${p.jatuh_tempo}</td><td>${terl > 0 ? terl + " hari" : "Hari ini"}</td><td><button class="btn-sm btn-wa" onclick="previewNota('${p.id}')"><i class="fab fa-whatsapp"></i> Nota</button><button class="btn-sm btn-success" onclick="tandaiLunas('${p.id}')">Lunas</button></td></tr>`;
+                tbody.innerHTML += `<tr><td style="font-weight:500;">${p.nama}</td><td>${kamar?.nomor}</td><td>${p.jatuh_tempo}</td><td>${terl > 0 ? terl + " hari" : "Hari ini"}</td><td><button class="btn-sm btn-wa" onclick="previewNota('${p.id}')"><i class="fab fa-whatsapp"></i> Nota</button><button class="btn-sm btn-success" onclick="tandaiLunas('${p.id}')">Lunas</button></td></tr>`;
             });
         }
     }
@@ -194,7 +270,7 @@
                 let status = cekStatus(p.jatuh_tempo);
                 let badgeClass = status === "lunas" ? "badge-lunas" : "badge-terlambat";
                 let badgeText = status === "lunas" ? "✅ Lunas" : "🔴 Terlambat";
-                tbody.innerHTML += `<tr><td>${p.nama}</td><td>${kamar?.nomor}</td><td>${p.no_wa}</td><td>${p.jatuh_tempo}</td><td><span class="badge ${badgeClass}">${badgeText}</span></td><td><button class="btn-sm btn-wa" onclick="previewNota('${p.id}')"><i class="fab fa-whatsapp"></i></button><button class="btn-sm btn-success" onclick="tandaiLunas('${p.id}')">Lunas</button><button class="btn-sm btn-danger" onclick="hapusPenyewa('${p.id}')"><i class="fas fa-trash"></i></button></td></tr>`;
+                tbody.innerHTML += `<tr><td style="font-weight:500;">${p.nama}</td><td>${kamar?.nomor}</td><td>${p.no_wa}</td><td>${p.jatuh_tempo}</td><td><span class="badge ${badgeClass}">${badgeText}</span></td><td><button class="btn-sm btn-wa" onclick="previewNota('${p.id}')"><i class="fab fa-whatsapp"></i></button><button class="btn-sm btn-success" onclick="tandaiLunas('${p.id}')">Lunas</button><button class="btn-sm btn-danger" onclick="hapusPenyewa('${p.id}')"><i class="fas fa-trash"></i></button></td></tr>`;
             });
         }
     }
@@ -248,10 +324,7 @@
         penyewaList.push({ id: "p" + Date.now(), nama, no_wa, kamar_id, tgl_masuk: tgl, jatuh_tempo });
         kamarList = kamarList.map(k => k.id === kamar_id ? { ...k, status: "terisi" } : k);
         await saveToFirebase();
-        renderTabelKamar();
-        renderTabelPenyewa();
-        renderDashboard();
-        hitungKeuangan();
+        renderTabelKamar(); renderTabelPenyewa(); renderDashboard(); hitungKeuangan();
         alert("Penyewa berhasil ditambahkan!");
         document.getElementById("nama").value = ""; document.getElementById("nowa").value = ""; document.getElementById("tgl_masuk").value = "";
     }
@@ -287,19 +360,16 @@
 
     function openTab(tabId) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
         document.getElementById(tabId).classList.add('active');
-        document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
+        document.querySelector(`.nav-item[data-tab="${tabId}"]`).classList.add('active');
         if (tabId === 'dashboard') renderDashboard();
         if (tabId === 'penyewa') renderTabelPenyewa();
         if (tabId === 'kamar') renderTabelKamar();
         if (tabId === 'pembukuan') { hitungKeuangan(); renderRiwayatTransaksi(); }
     }
 
-    function logout() {
-        localStorage.removeItem("kost_user");
-        window.location.href = "login.html";
-    }
+    function logout() { localStorage.removeItem("kost_user"); window.location.href = "login.html"; }
 
     if (checkAuth()) { loadData(); }
 </script>
